@@ -4,143 +4,106 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>You Found Me!</title>
+
   <style>
     body {
       font-family: Arial, sans-serif;
       text-align: center;
       background: #111;
       color: white;
-      padding: 20px;
       margin: 0;
       overflow: hidden;
     }
-    .video-container {
-      position: relative;
-      width: 100%;
-      max-width: 640px;
-      margin: 20px auto;
-      padding-top: 56.25%; /* 16:9 Aspect Ratio */
+
+    #player {
+      max-width: 800px;
+      margin: 40px auto;
+      aspect-ratio: 16/9;
     }
-    .video-container iframe {
-      position: absolute;
+
+    /* FULLSCREEN OVERLAY */
+    #overlay {
+      position: fixed;
       top: 0;
       left: 0;
-      width: 100%;
-      height: 100%;
-      border: none;
+      width: 100vw;
+      height: 100vh;
+      background: black;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      z-index: 9999;
     }
-    h1 {
-      margin: 20px 0;
-    }
-    input, button {
-      padding: 12px;
-      margin: 10px;
-      font-size: 16px;
-    }
-    button {
-      cursor: pointer;
+
+    #overlay button {
+      padding: 20px 40px;
+      font-size: 20px;
       background: #ff0000;
-      color: white;
       border: none;
-      border-radius: 4px;
+      border-radius: 6px;
+      color: white;
+      cursor: pointer;
+    }
+
+    #overlay h1 {
+      margin-bottom: 20px;
     }
   </style>
 </head>
 <body>
-  <h1>Why'd u scan this Yashas AHAHAH (or whoever got here) 😂</h1>
 
-  <div class="video-container">
-    <iframe 
-      id="rickroll"
-      src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=0&loop=1&playlist=dQw4w9WgXcQ"
-      title="Rick Astley - Never Gonna Give You Up"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-      allowfullscreen>
-    </iframe>
-  </div>
+<!-- Overlay -->
+<div id="overlay">
+  <h1>⚠️ Click to Continue</h1>
+  <button onclick="startRickroll()">Continue</button>
+</div>
 
-  <p>(Optional) Tell us who just got rickrolled:</p>
-  <input type="text" id="nameInput" placeholder="Your name or username">
-  <button onclick="sendName()">Submit</button>
-  <p id="status"></p>
+<h1>You got rickrolled 😂</h1>
+<div id="player"></div>
 
-  <script>
-    const webhookURL = "https://discord.com/api/webhooks/1470223913991802920/MzSJrTFcTKt18ntOlPi0NIYX_YCFws1CnwiukNwajVWahr7cumaPVsXK6YbHYl2k06Dr";
+<script src="https://www.youtube.com/iframe_api"></script>
 
-    // Auto send page visit
-    async function sendPageVisit() {
-      try {
-        await fetch(webhookURL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            content: "🎉 **New Rickroll Victim!**",
-            embeds: [{
-              color: 0xFF0000,
-              title: "Page Opened",
-              description: "Someone just loaded the rickroll page.",
-              timestamp: new Date().toISOString()
-            }]
-          })
-        });
-      } catch (e) {
-        // Fail silently
+<script>
+  let player;
+  const webhookURL = "YOUR_WEBHOOK_HERE";
+
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player('player', {
+      videoId: 'dQw4w9WgXcQ',
+      playerVars: {
+        controls: 0,
+        loop: 1,
+        playlist: 'dQw4w9WgXcQ'
       }
+    });
+  }
+
+  function startRickroll() {
+    // Hide overlay
+    document.getElementById("overlay").style.display = "none";
+
+    // Play WITH SOUND (now allowed)
+    if (player) {
+      player.unMute();
+      player.playVideo();
     }
 
-    function sendName() {
-      const name = document.getElementById("nameInput").value.trim();
-      if (!name) {
-        document.getElementById("status").innerText = "Please enter a name!";
-        return;
-      }
+    sendPageVisit();
+  }
 
-      fetch(webhookURL, {
+  async function sendPageVisit() {
+    try {
+      await fetch(webhookURL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          content: `😂 **${name}** just got absolutely rickrolled!`
+          content: "🎉 Someone fell for the click trap!"
         })
-      }).then(() => {
-        document.getElementById("status").innerText = "✅ Sent to the server!";
-      }).catch(() => {
-        document.getElementById("status").innerText = "❌ Failed to send.";
       });
-    }
+    } catch (e) {}
+  }
+</script>
 
-    // Try to force play on mobile (best effort)
-    function forcePlay() {
-      const iframe = document.getElementById("rickroll");
-      let src = iframe.src;
-
-      // Remove mute if present
-      if (src.includes("mute=1")) {
-        src = src.replace("mute=1", "mute=0");
-      }
-      // Ensure autoplay is on
-      if (!src.includes("autoplay=1")) {
-        src += (src.includes("?") ? "&" : "?") + "autoplay=1";
-      }
-
-      iframe.src = src;
-    }
-
-    // Run when page loads
-    window.addEventListener("load", () => {
-      sendPageVisit();
-      
-      // Try to autoplay immediately
-      setTimeout(forcePlay, 800);
-
-      // Fallback: Play on first user interaction (very important for mobile)
-      document.body.addEventListener("touchstart", () => {
-        forcePlay();
-      }, { once: true });
-
-      document.body.addEventListener("click", () => {
-        forcePlay();
-      }, { once: true });
-    });
-  </script>
 </body>
 </html>
