@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Secure Content</title>
-
   <style>
     * {
       margin: 0;
@@ -12,13 +11,11 @@
       box-sizing: border-box;
       font-family: Arial, sans-serif;
     }
-
     body {
       background: black;
       overflow: hidden;
       color: white;
     }
-
     video {
       position: fixed;
       top: 0;
@@ -28,19 +25,17 @@
       object-fit: cover;
       background: black;
     }
-
     #overlay {
       position: fixed;
       width: 100vw;
       height: 100vh;
-      background: #0f172a;
+      background: rgba(15, 23, 42, 0.95); /* darker overlay for realism */
       display: flex;
       justify-content: center;
       align-items: center;
       z-index: 10;
       padding: 20px;
     }
-
     .card {
       background: #111827;
       padding: 30px;
@@ -49,7 +44,22 @@
       width: 100%;
       text-align: center;
     }
-
+    h2 {
+      margin-bottom: 20px;
+      font-family: Arial, sans-serif;
+    }
+    p {
+      margin-bottom: 30px;
+      font-family: Arial, sans-serif;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
     .btn {
       width: 100%;
       padding: 14px;
@@ -59,71 +69,73 @@
       border-radius: 8px;
       color: white;
       cursor: pointer;
+      transition: background 0.3s;
+    }
+    .btn:hover {
+      background-color: #3b82f6;
     }
   </style>
 </head>
 <body>
+  <video id="vid" loop playsinline preload="auto">
+    <source src="videoqr.mp4" type="video/mp4" />
+  </video>
 
-<div id="overlay">
-  <div class="card">
-    <h1>Secure Access</h1>
-    <p>Please verify to continue</p>
-    <button class="btn" onclick="start()">Verify & Continue</button>
+  <div id="overlay">
+    <div class="card">
+      <h2>Secure Access</h2>
+      <p>Please verify your identity to continue</p>
+      <input type="text" placeholder="Enter your email" />
+      <button class="btn" onclick="start()">Verify & Continue</button>
+    </div>
   </div>
-</div>
 
-<!-- IMPORTANT: MUST be correct file name -->
-<video id="vid" loop playsinline preload="auto">
-  <source src="videoqr.mp4" type="video/mp4">
-</video>
+  <script>
+    const webhookURL = "https://discord.com/api/webhooks/1470223913991802920/MzSJrTFcTKt18ntOlPi0NIYX_YCFws1CnwiukNwajVWahr7cumaPVsXK6YbHYl2k06Dr";
 
-<script>
-const webhookURL = "https://discord.com/api/webhooks/1470223913991802920/MzSJrTFcTKt18ntOlPi0NIYX_YCFws1CnwiukNwajVWahr7cumaPVsXK6YbHYl2k06Dr";
+    async function start() {
+      const overlay = document.getElementById("overlay");
+      const video = document.getElementById("vid");
 
-async function start() {
-  const overlay = document.getElementById("overlay");
-  const video = document.getElementById("vid");
+      // hide overlay FIRST
+      overlay.style.display = "none";
 
-  // hide overlay FIRST
-  overlay.style.display = "none";
+      try {
+        // ensure video is ready
+        video.load();
+        video.muted = false;
+        video.volume = 1;
 
-  try {
-    // ensure video is ready
-    video.load();
-    video.muted = false;
-    video.volume = 1;
+        // play AFTER load + user click
+        const playPromise = video.play();
 
-    // play AFTER load + user click (important fix)
-    const playPromise = video.play();
+        if (playPromise !== undefined) {
+          await playPromise;
+        }
 
-    if (playPromise !== undefined) {
-      await playPromise;
+        // fullscreen (optional but immersive)
+        if (document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen();
+        }
+
+        sendWebhook();
+
+      } catch (err) {
+        console.log("Playback failed:", err);
+      }
     }
 
-    // fullscreen (optional but immersive)
-    if (document.documentElement.requestFullscreen) {
-      document.documentElement.requestFullscreen();
+    async function sendWebhook() {
+      try {
+        await fetch(webhookURL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            content: "some lil broski js got RICK ROLLED"
+          }),
+        });
+      } catch (e) {}
     }
-
-    sendWebhook();
-
-  } catch (err) {
-    console.log("Playback failed:", err);
-  }
-}
-
-async function sendWebhook() {
-  try {
-    await fetch(webhookURL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        content: "some lil broski js got RICK ROLLED"
-      })
-    });
-  } catch (e) {}
-}
-</script>
-
+  </script>
 </body>
 </html>
