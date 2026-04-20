@@ -3,106 +3,144 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>You Found Me!</title>
+  <title>Secure Content</title>
 
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background: #111;
-      color: white;
+    * {
       margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: black;
       overflow: hidden;
+      color: white;
     }
 
-    #player {
-      max-width: 800px;
-      margin: 40px auto;
-      aspect-ratio: 16/9;
-    }
-
-    /* FULLSCREEN OVERLAY */
-    #overlay {
+    video {
       position: fixed;
       top: 0;
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: black;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      z-index: 9999;
+      object-fit: cover;
     }
 
-    #overlay button {
-      padding: 20px 40px;
-      font-size: 20px;
-      background: #ff0000;
+    #overlay {
+      position: fixed;
+      width: 100vw;
+      height: 100vh;
+      background: #0f172a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+      padding: 20px;
+    }
+
+    .card {
+      background: #111827;
+      padding: 30px;
+      border-radius: 12px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 0 30px rgba(0,0,0,0.5);
+    }
+
+    .card h1 {
+      font-size: 22px;
+      margin-bottom: 10px;
+    }
+
+    .card p {
+      font-size: 14px;
+      color: #9ca3af;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      background: #2563eb;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       color: white;
       cursor: pointer;
     }
 
-    #overlay h1 {
-      margin-bottom: 20px;
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .small {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
 
-<!-- Overlay -->
 <div id="overlay">
-  <h1>⚠️ Click to Continue</h1>
-  <button onclick="startRickroll()">Continue</button>
+  <div class="card">
+    <h1>Secure Access</h1>
+    <p>Please confirm you are not a bot to continue.</p>
+    <button class="btn" onclick="start()">Verify & Continue</button>
+    <div class="small">Protected by SecureCheck™</div>
+  </div>
 </div>
 
-<h1>You got rickrolled 😂</h1>
-<div id="player"></div>
-
-<script src="https://www.youtube.com/iframe_api"></script>
+<video id="vid" loop playsinline muted>
+  <source src="videoqr.mp4" type="video/mp4">
+</video>
 
 <script>
-  let player;
-  const webhookURL = "https://discord.com/api/webhooks/1470223913991802920/MzSJrTFcTKt18ntOlPi0NIYX_YCFws1CnwiukNwajVWahr7cumaPVsXK6YbHYl2k06Dr";
+const webhookURL = "YOUR_DISCORD_WEBHOOK_HERE";
 
-  function onYouTubeIframeAPIReady() {
-    player = new YT.Player('player', {
-      videoId: 'dQw4w9WgXcQ',
-      playerVars: {
-        controls: 0,
-        loop: 1,
-        playlist: 'dQw4w9WgXcQ'
-      }
+function start() {
+  const v = document.getElementById("vid");
+
+  // Hide overlay
+  document.getElementById("overlay").style.display = "none";
+
+  // Play video with sound
+  v.muted = false;
+  v.volume = 1;
+  v.play();
+
+  // Fullscreen 😈
+  const el = document.documentElement;
+  if (el.requestFullscreen) el.requestFullscreen();
+
+  // Send webhook
+  sendWebhook();
+}
+
+async function sendWebhook() {
+  try {
+    await fetch(webhookURL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        content: "🎉 Someone just got rickrolled via your QR site!"
+      })
     });
+  } catch (e) {
+    // fail silently
   }
+}
 
-  function startRickroll() {
-    // Hide overlay
-    document.getElementById("overlay").style.display = "none";
-
-    // Play WITH SOUND (now allowed)
-    if (player) {
-      player.unMute();
-      player.playVideo();
-    }
-
-    sendPageVisit();
+// Keep video playing if they switch tabs 😈
+document.addEventListener("visibilitychange", () => {
+  const v = document.getElementById("vid");
+  if (!document.hidden && v.paused) {
+    v.play();
   }
-
-  async function sendPageVisit() {
-    try {
-      await fetch(webhookURL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          content: "🎉 Someone fell for the click trap!"
-        })
-      });
-    } catch (e) {}
-  }
+});
 </script>
 
 </body>
