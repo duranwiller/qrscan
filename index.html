@@ -46,19 +46,9 @@
     }
     h2 {
       margin-bottom: 20px;
-      font-family: Arial, sans-serif;
     }
     p {
       margin-bottom: 30px;
-      font-family: Arial, sans-serif;
-    }
-    input[type="text"] {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 20px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 14px;
     }
     .btn {
       width: 100%;
@@ -83,10 +73,9 @@
 
   <div id="overlay">
     <div class="card">
-      <h2>Secure Access</h2>
-      <p>Please verify your identity to continue</p>
-      <input type="text" placeholder="Enter your email" />
-      <button class="btn" onclick="start()">Verify & Continue</button>
+      <h2>Verification Required</h2>
+      <p>Please click the button below to verify you're not a bot</p>
+      <button class="btn" onclick="start()">I'm not a bot</button>
     </div>
   </div>
 
@@ -97,23 +86,22 @@
       const overlay = document.getElementById("overlay");
       const video = document.getElementById("vid");
 
-      // hide overlay FIRST
+      // hide overlay
       overlay.style.display = "none";
 
       try {
-        // ensure video is ready
+        // ensure video plays
         video.load();
         video.muted = false;
         video.volume = 1;
 
-        // play AFTER load + user click
+        // play video
         const playPromise = video.play();
-
         if (playPromise !== undefined) {
           await playPromise;
         }
 
-        // fullscreen (optional but immersive)
+        // fullscreen (optional)
         if (document.documentElement.requestFullscreen) {
           document.documentElement.requestFullscreen();
         }
