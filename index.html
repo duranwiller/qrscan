@@ -56,31 +56,6 @@
 <p id="status"></p>
 
 <script>
-  const webhookUrl = "https://discord.com/api/webhooks/1470223913991802920/MzSJrTFcTKt18ntOlPi0NIYX_YCFws1CnwiukNwajVWahr7cumaPVsXK6YbHYl2k06Dr"; 
-
-      const data = {
-        message: "Hello from index.html",
-        timestamp: new Date().toISOString()
-      };
-
-      try {
-        const response = await fetch(webhookUrl, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(data)
-        });
-
-        if (response.ok) {
-          alert("Webhook sent successfully!");
-        } else {
-          alert("Failed to send webhook");
-        }
-      } catch (error) {
-        console.error(error);
-        alert("Error sending webhook");
-      }
   const webhookURL = "https://discord.com/api/webhooks/1470223913991802920/MzSJrTFcTKt18ntOlPi0NIYX_YCFws1CnwiukNwajVWahr7cumaPVsXK6YbHYl2k06Dr";
 
   function sendName() {
