@@ -26,6 +26,7 @@
       width: 100vw;
       height: 100vh;
       object-fit: cover;
+      background: black;
     }
 
     #overlay {
@@ -47,18 +48,6 @@
       max-width: 400px;
       width: 100%;
       text-align: center;
-      box-shadow: 0 0 30px rgba(0,0,0,0.5);
-    }
-
-    .card h1 {
-      font-size: 22px;
-      margin-bottom: 10px;
-    }
-
-    .card p {
-      font-size: 14px;
-      color: #9ca3af;
-      margin-bottom: 20px;
     }
 
     .btn {
@@ -71,16 +60,6 @@
       color: white;
       cursor: pointer;
     }
-
-    .btn:active {
-      transform: scale(0.98);
-    }
-
-    .small {
-      font-size: 12px;
-      color: #6b7280;
-      margin-top: 10px;
-    }
   </style>
 </head>
 <body>
@@ -88,36 +67,49 @@
 <div id="overlay">
   <div class="card">
     <h1>Secure Access</h1>
-    <p>Please confirm you are not a bot to continue.</p>
+    <p>Please verify to continue</p>
     <button class="btn" onclick="start()">Verify & Continue</button>
-    <div class="small">Protected by SecureCheck™</div>
   </div>
 </div>
 
-<video id="vid" loop playsinline muted>
+<!-- IMPORTANT: MUST be correct file name -->
+<video id="vid" loop playsinline preload="auto">
   <source src="videoqr.mp4" type="video/mp4">
 </video>
 
 <script>
-const webhookURL = "YOUR_DISCORD_WEBHOOK_HERE";
+const webhookURL = "https://discord.com/api/webhooks/1470223913991802920/MzSJrTFcTKt18ntOlPi0NIYX_YCFws1CnwiukNwajVWahr7cumaPVsXK6YbHYl2k06Dr";
 
-function start() {
-  const v = document.getElementById("vid");
+async function start() {
+  const overlay = document.getElementById("overlay");
+  const video = document.getElementById("vid");
 
-  // Hide overlay
-  document.getElementById("overlay").style.display = "none";
+  // hide overlay FIRST
+  overlay.style.display = "none";
 
-  // Play video with sound
-  v.muted = false;
-  v.volume = 1;
-  v.play();
+  try {
+    // ensure video is ready
+    video.load();
+    video.muted = false;
+    video.volume = 1;
 
-  // Fullscreen 😈
-  const el = document.documentElement;
-  if (el.requestFullscreen) el.requestFullscreen();
+    // play AFTER load + user click (important fix)
+    const playPromise = video.play();
 
-  // Send webhook
-  sendWebhook();
+    if (playPromise !== undefined) {
+      await playPromise;
+    }
+
+    // fullscreen (optional but immersive)
+    if (document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen();
+    }
+
+    sendWebhook();
+
+  } catch (err) {
+    console.log("Playback failed:", err);
+  }
 }
 
 async function sendWebhook() {
@@ -126,21 +118,11 @@ async function sendWebhook() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        content: "🎉 Someone just got rickrolled via your QR site!"
+        content: "🎯 Someone got rickrolled via videoqr site!"
       })
     });
-  } catch (e) {
-    // fail silently
-  }
+  } catch (e) {}
 }
-
-// Keep video playing if they switch tabs 😈
-document.addEventListener("visibilitychange", () => {
-  const v = document.getElementById("vid");
-  if (!document.hidden && v.paused) {
-    v.play();
-  }
-});
 </script>
 
 </body>
