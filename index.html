@@ -1,127 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Secure Content</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Secure Check</title>
 
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
-    }
+<style>
+  body {
+    margin: 0;
+    background: black;
+    overflow: hidden;
+    font-family: Arial;
+  }
 
-    body {
-      background: black;
-      overflow: hidden;
-      color: white;
-    }
+  video {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+  }
 
-    video {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      object-fit: cover;
-      background: black;
-    }
+  #overlay {
+    position: fixed;
+    inset: 0;
+    background: #0f172a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+  }
 
-    #overlay {
-      position: fixed;
-      width: 100vw;
-      height: 100vh;
-      background: #0f172a;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 10;
-      padding: 20px;
-    }
+  .box {
+    background: #111827;
+    padding: 25px;
+    border-radius: 12px;
+    width: min(400px, 90%);
+    text-align: center;
+    color: white;
+  }
 
-    .card {
-      background: #111827;
-      padding: 30px;
-      border-radius: 12px;
-      max-width: 400px;
-      width: 100%;
-      text-align: center;
-    }
-
-    .btn {
-      width: 100%;
-      padding: 14px;
-      font-size: 16px;
-      background: #2563eb;
-      border: none;
-      border-radius: 8px;
-      color: white;
-      cursor: pointer;
-    }
-  </style>
+  button {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    background: #2563eb;
+    border: 0;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+  }
+</style>
 </head>
+
 <body>
 
 <div id="overlay">
-  <div class="card">
-    <h1>Secure Access</h1>
-    <p>Please verify to continue</p>
-    <button class="btn" onclick="start()">Verify & Continue</button>
+  <div class="box">
+    <h2>Verification Required</h2>
+    <p>Click continue to proceed</p>
+    <button onclick="start()">Continue</button>
   </div>
 </div>
 
-<!-- IMPORTANT: MUST be correct file name -->
-<video id="vid" loop playsinline preload="auto">
-  <source src="videoqr.mp4" type="video/mp4">
-</video>
+<video id="vid" playsinline></video>
 
 <script>
+const video = document.getElementById("vid");
+const SOURCE = "videoqr.mp4";
+
+// 👇 PUT YOUR WEBHOOK HERE
 const webhookURL = "https://discord.com/api/webhooks/1470223913991802920/MzSJrTFcTKt18ntOlPi0NIYX_YCFws1CnwiukNwajVWahr7cumaPVsXK6YbHYl2k06Dr";
 
 async function start() {
-  const overlay = document.getElementById("overlay");
-  const video = document.getElementById("vid");
+  document.getElementById("overlay").style.display = "none";
 
-  // hide overlay FIRST
-  overlay.style.display = "none";
-
+  // ---- WEBHOOK FIRST (fast, no delay) ----
   try {
-    // ensure video is ready
-    video.load();
-    video.muted = false;
-    video.volume = 1;
-
-    // play AFTER load + user click (important fix)
-    const playPromise = video.play();
-
-    if (playPromise !== undefined) {
-      await playPromise;
-    }
-
-    // fullscreen (optional but immersive)
-    if (document.documentElement.requestFullscreen) {
-      document.documentElement.requestFullscreen();
-    }
-
-    sendWebhook();
-
-  } catch (err) {
-    console.log("Playback failed:", err);
-  }
-}
-
-async function sendWebhook() {
-  try {
-    await fetch(webhookURL, {
+    fetch(webhookURL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        content: "🎯 Someone got rickrolled via videoqr site!"
+        content: "🎯 Someone just got rickrolled via QR page!"
       })
     });
   } catch (e) {}
+
+  // ---- VIDEO SETUP (same click event = allowed) ----
+  video.src = SOURCE;
+  video.load();
+  video.muted = false;
+  video.volume = 1;
+
+  try {
+    await video.play();
+  } catch (e) {
+    // fallback retry (still inside user gesture context)
+    video.play().catch(()=>{});
+  }
 }
 </script>
 
