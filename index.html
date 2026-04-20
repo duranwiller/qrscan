@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Totally Normal Website 👀</title>
+  <title>You Found Me!</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -33,48 +33,59 @@
   </style>
 </head>
 <body>
-<h1>Welcome 👀</h1>
+  <h1>Welcome 👀</h1>
+  
+  <div class="video-container">
+    <iframe
+      id="video"
+      src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1"
+      title="YouTube video"
+      allow="autoplay"
+      allowfullscreen>
+    </iframe>
+  </div>
 
-<div class="video-container">
-  <iframe
-    id="video"
-    src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1"
-    title="YouTube video"
-    allow="autoplay"
-    allowfullscreen>
-  </iframe>
-</div>
-
-<p>(Optional) Would you like to enter your name so we know who got rickrolled?</p>
-<input type="text" id="nameInput" placeholder="Your name">
-<button onclick="sendName()">Submit</button>
-<p id="status"></p>
+  <p>(Optional) Would you like to enter your name so we know who got rickrolled?</p>
+  <input type="text" id="nameInput" placeholder="Your name">
+  <button onclick="sendName()">Submit</button>
+  <p id="status"></p>
 
 <script>
   const webhookURL = "https://discord.com/api/webhooks/1470223913991802920/MzSJrTFcTKt18ntOlPi0NIYX_YCFws1CnwiukNwajVWahr7cumaPVsXK6YbHYl2k06Dr";
 
-  // === AUTO SEND when someone enters the website ===
-  function sendPageVisit() {
-    fetch(webhookURL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        content: "🎉 **Someone just got rickrolled!**",
-        embeds: [{
-          color: 0xff0000,
-          title: "New Victim Detected 👀",
-          description: "A new person opened the rickroll page.",
-          timestamp: new Date().toISOString()
-        }]
-      })
-    }).catch(() => {
-      // Silently fail if webhook is blocked or invalid
-    });
+  // ======================
+  // AUTO SEND on page load
+  // ======================
+  async function sendPageVisit() {
+    try {
+      const response = await fetch(webhookURL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          content: "🎉 **Someone just opened the rickroll page!**",
+          embeds: [{
+            color: 0xFF0000,
+            title: "New Victim 👀",
+            description: "A new person loaded the website.",
+            timestamp: new Date().toISOString()
+          }]
+        })
+      });
+
+      if (response.ok) {
+        console.log("Auto webhook sent successfully");
+      }
+    } catch (error) {
+      console.error("Failed to send auto webhook:", error);
+      // Fail silently so the page still works
+    }
   }
 
-  // === Send name if user enters one ===
+  // ======================
+  // Send name when user submits
+  // ======================
   function sendName() {
     const name = document.getElementById("nameInput").value.trim();
     if (!name) {
@@ -92,19 +103,17 @@
       })
     })
     .then(() => {
-      document.getElementById("status").innerText = "✅ Sent! Thanks for playing fair~";
+      document.getElementById("status").innerText = "✅ Sent!";
     })
     .catch(() => {
       document.getElementById("status").innerText = "❌ Error sending.";
     });
   }
 
-  // Auto-send on page load
-  window.addEventListener("load", () => {
-    sendPageVisit();
-  });
+  // Run the auto-send when the page loads
+  window.addEventListener("load", sendPageVisit);
 
-  // Optional: unmute video after user clicks anywhere (bypasses browser autoplay restrictions)
+  // Unmute video after first click (bypasses browser restrictions)
   document.body.addEventListener("click", () => {
     const iframe = document.getElementById("video");
     if (iframe.src.includes("mute=1")) {
