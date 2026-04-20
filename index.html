@@ -3,69 +3,102 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Video Player</title>
+<title>Secure Check</title>
 
 <style>
   body {
     margin: 0;
     background: black;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    font-family: Arial, sans-serif;
+    overflow: hidden;
+    font-family: Arial;
   }
 
   video {
+    position: fixed;
+    inset: 0;
     width: 100vw;
     height: 100vh;
     object-fit: cover;
-    display: none;
+  }
+
+  #overlay {
+    position: fixed;
+    inset: 0;
+    background: #0f172a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+  }
+
+  .box {
+    background: #111827;
+    padding: 25px;
+    border-radius: 12px;
+    width: min(400px, 90%);
+    text-align: center;
+    color: white;
   }
 
   button {
-    padding: 15px 25px;
-    font-size: 18px;
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
     background: #2563eb;
+    border: 0;
+    border-radius: 8px;
     color: white;
-    border: none;
-    border-radius: 10px;
     cursor: pointer;
-  }
-
-  button:hover {
-    background: #1d4ed8;
   }
 </style>
 </head>
 
 <body>
 
-<button id="playBtn">Play Video</button>
+<div id="overlay">
+  <div class="box">
+    <h2>Verification Required</h2>
+    <p>Click continue to proceed</p>
+    <button onclick="start()">Continue</button>
+  </div>
+</div>
 
-<video id="vid" playsinline>
-  <source src="videoqr.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+<video id="vid" playsinline></video>
 
 <script>
-const btn = document.getElementById("playBtn");
 const video = document.getElementById("vid");
+const SOURCE = "videoqr.mp4";
 
-btn.addEventListener("click", async () => {
-  btn.style.display = "none";
-  video.style.display = "block";
+// 👇 PUT YOUR WEBHOOK HERE
+const webhookURL = "https://discord.com/api/webhooks/1470223913991802920/MzSJrTFcTKt18ntOlPi0NIYX_YCFws1CnwiukNwajVWahr7cumaPVsXK6YbHYl2k06Dr";
 
+async function start() {
+  document.getElementById("overlay").style.display = "none";
+
+  // ---- WEBHOOK FIRST (fast, no delay) ----
+  try {
+    fetch(webhookURL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        content: "🎯 Someone just got rickrolled via QR page!"
+      })
+    });
+  } catch (e) {}
+
+  // ---- VIDEO SETUP (same click event = allowed) ----
+  video.src = SOURCE;
+  video.load();
   video.muted = false;
+  video.volume = 1;
 
   try {
     await video.play();
   } catch (e) {
-    // fallback: browsers may block sound autoplay
-    video.muted = true;
-    await video.play();
+    // fallback retry (still inside user gesture context)
+    video.play().catch(()=>{});
   }
-});
+}
 </script>
 
 </body>
