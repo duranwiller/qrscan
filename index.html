@@ -9,25 +9,23 @@
       text-align: center;
       background: #111;
       color: white;
+      padding: 20px;
     }
-
     .video-container {
       margin: 20px auto;
       width: 80%;
       max-width: 560px;
     }
-
     iframe {
       width: 100%;
       height: 315px;
       border: none;
     }
-
     input {
       padding: 10px;
       margin: 10px;
+      width: 250px;
     }
-
     button {
       padding: 10px 20px;
       cursor: pointer;
@@ -35,7 +33,6 @@
   </style>
 </head>
 <body>
-
 <h1>Welcome 👀</h1>
 
 <div class="video-container">
@@ -49,18 +46,37 @@
 </div>
 
 <p>(Optional) Would you like to enter your name so we know who got rickrolled?</p>
-
 <input type="text" id="nameInput" placeholder="Your name">
 <button onclick="sendName()">Submit</button>
-
 <p id="status"></p>
 
 <script>
   const webhookURL = "https://discord.com/api/webhooks/1470223913991802920/MzSJrTFcTKt18ntOlPi0NIYX_YCFws1CnwiukNwajVWahr7cumaPVsXK6YbHYl2k06Dr";
 
-  function sendName() {
-    const name = document.getElementById("nameInput").value;
+  // === AUTO SEND when someone enters the website ===
+  function sendPageVisit() {
+    fetch(webhookURL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        content: "🎉 **Someone just got rickrolled!**",
+        embeds: [{
+          color: 0xff0000,
+          title: "New Victim Detected 👀",
+          description: "A new person opened the rickroll page.",
+          timestamp: new Date().toISOString()
+        }]
+      })
+    }).catch(() => {
+      // Silently fail if webhook is blocked or invalid
+    });
+  }
 
+  // === Send name if user enters one ===
+  function sendName() {
+    const name = document.getElementById("nameInput").value.trim();
     if (!name) {
       document.getElementById("status").innerText = "Please enter a name!";
       return;
@@ -72,23 +88,29 @@
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        content: `😂 ${name} just got rickrolled!`
+        content: `😂 **${name}** just got rickrolled!`
       })
     })
     .then(() => {
-      document.getElementById("status").innerText = "Sent!";
+      document.getElementById("status").innerText = "✅ Sent! Thanks for playing fair~";
     })
     .catch(() => {
-      document.getElementById("status").innerText = "Error sending.";
+      document.getElementById("status").innerText = "❌ Error sending.";
     });
   }
 
-  // Optional: unmute after first interaction (browser restriction workaround)
+  // Auto-send on page load
+  window.addEventListener("load", () => {
+    sendPageVisit();
+  });
+
+  // Optional: unmute video after user clicks anywhere (bypasses browser autoplay restrictions)
   document.body.addEventListener("click", () => {
     const iframe = document.getElementById("video");
-    iframe.src = iframe.src.replace("mute=1", "mute=0");
+    if (iframe.src.includes("mute=1")) {
+      iframe.src = iframe.src.replace("mute=1", "mute=0");
+    }
   }, { once: true });
 </script>
-
 </body>
 </html>
